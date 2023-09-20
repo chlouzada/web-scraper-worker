@@ -7,7 +7,10 @@ import { sql } from './helpers/db';
 type Schedule = 15 | 30 | 60 | 180 | 720 | 1440;
 
 const getScrapers = async (schedule: Schedule): Promise<Scraper[]> => {
-  const result: Scraper[] = [];
+  const result: Scraper[] = await sql`
+  SELECT * FROM scrapers
+  WHERE schedule = ${schedule}
+  `;
   return result;
 };
 
