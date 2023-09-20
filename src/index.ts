@@ -1,6 +1,6 @@
 import cron from 'node-cron';
 import { browser } from './helpers/puppeteer';
-import { Scraper } from './helpers/supabase';
+import { Scraper } from './types';
 
 type Schedule = 15 | 30 | 60 | 180 | 720 | 1440;
 

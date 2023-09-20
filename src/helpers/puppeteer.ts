@@ -1,12 +1,13 @@
 const puppeteer = require('puppeteer-core');
+import { TBrowser, TConfig } from '../types';
 
-const config: any = {
+const config: TConfig = {
   headless: true,
   args: ['--no-sandbox', '--disable-gpu'],
 };
 
 export const browser = new (class Browser {
-  browser: any | null;
+  browser: TBrowser | null = null;
   pages = 0;
 
   private async get() {
@@ -19,19 +20,18 @@ export const browser = new (class Browser {
   async page() {
     const b = await this.get();
     this.pages++;
-    const p = b.newPage();
+    const p = await b!.newPage();
     await p.setUserAgent(
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/61.0.3163.100 Safari/537.36'
     );
     return p;
   }
 
-  close(page: any) {
+  close(page: Awaited<ReturnType<TBrowser['pages']>>[number]) {
     this.pages--;
-    if (this.pages === 0) {
-      console.log('closing browser');
-      return this.browser.close();
+    if (this.pages > 0) {
+      return page.close();
     }
-    return page.close();
+    return this.browser?.close();
   }
 })();
