@@ -31,8 +31,16 @@ exports.browser = new (class Browser {
         return __awaiter(this, void 0, void 0, function* () {
             if (!this.browser) {
                 this.browser = yield puppeteer.launch(config);
+                return this.browser;
             }
             return this.browser;
+        });
+    }
+    terminate() {
+        var _a;
+        return __awaiter(this, void 0, void 0, function* () {
+            yield ((_a = this.browser) === null || _a === void 0 ? void 0 : _a.close());
+            this.browser = null;
         });
     }
     page() {
@@ -45,13 +53,9 @@ exports.browser = new (class Browser {
         });
     }
     close(page) {
-        var _a;
-        this.pages--;
-        if (this.pages > 0) {
-            return page.close();
-        }
-        (_a = this.browser) === null || _a === void 0 ? void 0 : _a.close();
-        this.browser = null;
-        return;
+        return __awaiter(this, void 0, void 0, function* () {
+            this.pages--;
+            return this.pages === 0 ? this.terminate() : page.close();
+        });
     }
 })();

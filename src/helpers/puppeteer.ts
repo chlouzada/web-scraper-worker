@@ -16,14 +16,20 @@ const config: TConfig =
       };
 
 export const browser = new (class Browser {
-  browser: TBrowser | null = null;
-  pages = 0;
+  private browser: TBrowser | null = null;
+  private pages = 0;
 
   private async get() {
     if (!this.browser) {
       this.browser = await puppeteer.launch(config);
+      return this.browser;
     }
     return this.browser;
+  }
+
+  private async terminate() {
+    await this.browser?.close();
+    this.browser = null;
   }
 
   async page() {
@@ -36,13 +42,8 @@ export const browser = new (class Browser {
     return p;
   }
 
-  close(page: Awaited<ReturnType<TBrowser['pages']>>[number]) {
+ async close(page: Awaited<ReturnType<TBrowser['pages']>>[number]) {
     this.pages--;
-    if (this.pages > 0) {
-      return page.close();
-    }
-    this.browser?.close();
-    this.browser = null;
-    return;
+    return this.pages === 0 ? this.terminate() : page.close();
   }
 })();
