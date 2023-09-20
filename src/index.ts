@@ -7,10 +7,7 @@ import { sql } from './helpers/db';
 type Schedule = 15 | 30 | 60 | 180 | 720 | 1440;
 
 const getScrapers = async (schedule: Schedule): Promise<Scraper[]> => {
-  const result: Scraper[] = await sql`
-  SELECT * FROM scrapers
-  WHERE schedule = ${schedule}
-  `;
+  const result: Scraper[] = [];
   return result;
 };
 
@@ -50,17 +47,19 @@ const run = async (schedule: Schedule) => {
     for (const item of selectors) {
       console.log('selector', item.selector);
 
-      const value = await page.$eval(
-        item.selector,
-        (el: any) => el.textContent
+      const elements = await page.$$(item.selector);
+      const inside = await Promise.all(
+        elements.map(async (el) => {
+          const content = await el.getProperty('textContent'); // TODO: 'innerHTML'
+          return content.jsonValue();
+        })
       );
-      values.push(String(value));
 
-      if (!value) {
-        console.log('not value', value);
-      } else {
-        console.log('value', value);
+      if (inside.length === 0) {
+        console.log('no value');
       }
+
+      values.push(inside);
     }
 
     await createResultForScraper({

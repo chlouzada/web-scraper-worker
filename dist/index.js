@@ -16,12 +16,8 @@ exports.init = void 0;
 require("dotenv/config");
 const node_cron_1 = __importDefault(require("node-cron"));
 const puppeteer_1 = require("./helpers/puppeteer");
-const db_1 = require("./helpers/db");
 const getScrapers = (schedule) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield (0, db_1.sql) `
-  SELECT * FROM scrapers
-  WHERE schedule = ${schedule}
-  `;
+    const result = [];
     return result;
 });
 const createResultForScraper = ({ selectors, values, }) => __awaiter(void 0, void 0, void 0, function* () {
@@ -48,14 +44,15 @@ const run = (schedule) => __awaiter(void 0, void 0, void 0, function* () {
         const values = [];
         for (const item of selectors) {
             console.log('selector', item.selector);
-            const value = yield page.$eval(item.selector, (el) => el.textContent);
-            values.push(String(value));
-            if (!value) {
-                console.log('not value', value);
+            const elements = yield page.$$(item.selector);
+            const inside = yield Promise.all(elements.map((el) => __awaiter(void 0, void 0, void 0, function* () {
+                const content = yield el.getProperty('textContent'); // TODO: 'innerHTML'
+                return content.jsonValue();
+            })));
+            if (inside.length === 0) {
+                console.log('no value');
             }
-            else {
-                console.log('value', value);
-            }
+            values.push(inside);
         }
         yield createResultForScraper({
             values,
