@@ -1,11 +1,17 @@
+import 'dotenv/config';
 import cron from 'node-cron';
 import { browser } from './helpers/puppeteer';
 import { Scraper } from './types';
+import { sql } from './helpers/db';
 
 type Schedule = 15 | 30 | 60 | 180 | 720 | 1440;
 
 const getScrapers = async (schedule: Schedule): Promise<Scraper[]> => {
-  return [];
+  const result: Scraper[] = await sql`
+  SELECT * FROM scrapers
+  WHERE schedule = ${schedule}
+  `;
+  return result;
 };
 
 const createResultForScraper = async ({
@@ -77,7 +83,6 @@ export const init = () => {
   cron.schedule('0 */6 * * *', () => run(720));
   cron.schedule('0 */12 * * *', () => run(1440));
 };
-
 
 // init();
 run(15);
