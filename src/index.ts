@@ -41,12 +41,16 @@ const run = async (schedule: Schedule) => {
     const { url, selectors } = scraper;
     console.log(url, selectors);
 
+    console.time('goto')
     await page.goto(url, { waitUntil: 'networkidle2' });
+    console.timeEnd('goto')
 
     const values = [];
     for (const item of selectors) {
+      console.time('each selector')
       console.log('selector', item.selector);
 
+      console.time('wait for selector')
       const elements = await page.$$(item.selector);
       const inside = await Promise.all(
         elements.map(async (el) => {
@@ -54,12 +58,10 @@ const run = async (schedule: Schedule) => {
           return content.jsonValue();
         })
       );
-
-      if (inside.length === 0) {
-        console.log('no value');
-      }
+      console.timeEnd('wait for selector')
 
       values.push(inside);
+      console.timeEnd('each selector')
     }
 
     await createResultForScraper({

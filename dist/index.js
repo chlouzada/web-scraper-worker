@@ -40,19 +40,22 @@ const run = (schedule) => __awaiter(void 0, void 0, void 0, function* () {
     for (const scraper of scrapers) {
         const { url, selectors } = scraper;
         console.log(url, selectors);
+        console.time('goto');
         yield page.goto(url, { waitUntil: 'networkidle2' });
+        console.timeEnd('goto');
         const values = [];
         for (const item of selectors) {
+            console.time('each selector');
             console.log('selector', item.selector);
+            console.time('wait for selector');
             const elements = yield page.$$(item.selector);
             const inside = yield Promise.all(elements.map((el) => __awaiter(void 0, void 0, void 0, function* () {
                 const content = yield el.getProperty('textContent'); // TODO: 'innerHTML'
                 return content.jsonValue();
             })));
-            if (inside.length === 0) {
-                console.log('no value');
-            }
+            console.timeEnd('wait for selector');
             values.push(inside);
+            console.timeEnd('each selector');
         }
         yield createResultForScraper({
             values,
