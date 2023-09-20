@@ -86,4 +86,4 @@ export const init = () => {
 };
 
 init();
-// run(15);
+run(15);

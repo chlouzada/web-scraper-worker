@@ -76,4 +76,4 @@ const init = () => {
 };
 exports.init = init;
 (0, exports.init)();
-// run(15);
+run(15);
