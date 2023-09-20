@@ -32,6 +32,8 @@ export const browser = new (class Browser {
     if (this.pages > 0) {
       return page.close();
     }
-    return this.browser?.close();
+    this.browser?.close();
+    this.browser = null;
+     return;
   }
 })();

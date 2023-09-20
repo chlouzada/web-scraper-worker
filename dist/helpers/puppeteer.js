@@ -43,6 +43,8 @@ exports.browser = new (class Browser {
         if (this.pages > 0) {
             return page.close();
         }
-        return (_a = this.browser) === null || _a === void 0 ? void 0 : _a.close();
+        (_a = this.browser) === null || _a === void 0 ? void 0 : _a.close();
+        this.browser = null;
+        return;
     }
 })();
