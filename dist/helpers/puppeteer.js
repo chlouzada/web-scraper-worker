@@ -11,10 +11,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.browser = void 0;
 const puppeteer = require('puppeteer-core');
-const config = {
-    headless: true,
-    args: ['--no-sandbox', '--disable-gpu'],
-};
+const env_1 = require("../env");
+const config = env_1.env.NODE_ENV === 'production'
+    ? {
+        headless: true,
+        args: ['--no-sandbox', '--disable-gpu'],
+    }
+    : {
+        headless: false,
+        args: ['--no-sandbox', '--disable-gpu'],
+        executablePath: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+    };
 exports.browser = new (class Browser {
     constructor() {
         this.browser = null;

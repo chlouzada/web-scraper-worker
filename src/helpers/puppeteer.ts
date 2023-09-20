@@ -1,10 +1,19 @@
 const puppeteer = require('puppeteer-core');
+import { env } from '../env';
 import { TBrowser, TConfig } from '../types';
 
-const config: TConfig = {
-  headless: true,
-  args: ['--no-sandbox', '--disable-gpu'],
-};
+const config: TConfig =
+  env.NODE_ENV === 'production'
+    ? {
+        headless: true,
+        args: ['--no-sandbox', '--disable-gpu'],
+      }
+    : {
+        headless: false,
+        args: ['--no-sandbox', '--disable-gpu'],
+        executablePath:
+          'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+      };
 
 export const browser = new (class Browser {
   browser: TBrowser | null = null;
@@ -34,6 +43,6 @@ export const browser = new (class Browser {
     }
     this.browser?.close();
     this.browser = null;
-     return;
+    return;
   }
 })();

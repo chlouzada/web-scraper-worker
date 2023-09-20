@@ -13,7 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.init = void 0;
-require("dotenv/config");
+require("./env");
 const node_cron_1 = __importDefault(require("node-cron"));
 const puppeteer_1 = require("./helpers/puppeteer");
 const db_1 = require("./helpers/db");
@@ -79,5 +79,8 @@ const init = () => {
     node_cron_1.default.schedule('0 */12 * * *', () => run(1440));
 };
 exports.init = init;
-(0, exports.init)();
-run(15);
+const main = () => __awaiter(void 0, void 0, void 0, function* () {
+    // init();
+    yield run(15);
+});
+main();

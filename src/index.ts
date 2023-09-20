@@ -1,4 +1,4 @@
-import 'dotenv/config';
+import './env'
 import cron from 'node-cron';
 import { browser } from './helpers/puppeteer';
 import { Scraper } from './types';
@@ -88,5 +88,16 @@ export const init = () => {
   cron.schedule('0 */12 * * *', () => run(1440));
 };
 
-init();
-run(15);
+
+
+
+
+const main = async () => {
+  // init();
+
+  await run(15);
+
+}
+
+main()
+
