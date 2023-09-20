@@ -84,5 +84,5 @@ export const init = () => {
   cron.schedule('0 */12 * * *', () => run(1440));
 };
 
-// init();
-run(15);
+init();
+// run(15);

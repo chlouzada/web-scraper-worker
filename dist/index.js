@@ -75,5 +75,5 @@ const init = () => {
     node_cron_1.default.schedule('0 */12 * * *', () => run(1440));
 };
 exports.init = init;
-// init();
-run(15);
+(0, exports.init)();
+// run(15);
