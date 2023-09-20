@@ -13,10 +13,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.init = void 0;
+require("dotenv/config");
 const node_cron_1 = __importDefault(require("node-cron"));
 const puppeteer_1 = require("./helpers/puppeteer");
+const db_1 = require("./helpers/db");
 const getScrapers = (schedule) => __awaiter(void 0, void 0, void 0, function* () {
-    return [];
+    const result = yield (0, db_1.sql) `
+  SELECT * FROM scrapers
+  WHERE schedule = ${schedule}
+  `;
+    return result;
 });
 const createResultForScraper = ({ selectors, values, }) => __awaiter(void 0, void 0, void 0, function* () {
     console.log('createResults', selectors, values);
