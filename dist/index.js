@@ -17,6 +17,7 @@ require("./env");
 const node_cron_1 = __importDefault(require("node-cron"));
 const puppeteer_1 = require("./helpers/puppeteer");
 const db_1 = require("./helpers/db");
+const logger_1 = require("./helpers/logger");
 const getScrapers = (schedule) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield (0, db_1.sql) `
   SELECT * FROM scrapers
@@ -25,41 +26,35 @@ const getScrapers = (schedule) => __awaiter(void 0, void 0, void 0, function* ()
     return result;
 });
 const createResultForScraper = ({ selectors, values, }) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log('createResults', selectors, values);
+    logger_1.logger.info('create-results', JSON.stringify({ selectors, values }));
     // const results = values.map((value: any, index: any) => ({
     //   selectorId: selectors[index]._id,
     //   value,
     //   createdAt: new Date(),
     // }));
     // await ResultCollection.insertMany(results);
-    console.log('done creating results');
 });
 const run = (schedule) => __awaiter(void 0, void 0, void 0, function* () {
     const executionId = [schedule, new Date().toISOString()];
-    console.log('Running', ...executionId);
+    logger_1.logger.info('Running', ...executionId);
     const [scrapers, page] = yield Promise.all([
         getScrapers(schedule),
         puppeteer_1.browser.page(),
     ]);
     for (const scraper of scrapers) {
         const { url, selectors } = scraper;
-        console.log(url, selectors);
+        // logger.info(url, selectors);
         console.time('goto');
         yield page.goto(url, { waitUntil: 'networkidle2' });
         console.timeEnd('goto');
         const values = [];
         for (const item of selectors) {
-            console.time('each selector');
-            console.log('selector', item.selector);
-            console.time('wait for selector');
             const elements = yield page.$$(item.selector);
             const inside = yield Promise.all(elements.map((el) => __awaiter(void 0, void 0, void 0, function* () {
                 const content = yield el.getProperty('textContent'); // TODO: 'innerHTML'
                 return content.jsonValue();
             })));
-            console.timeEnd('wait for selector');
             values.push(inside);
-            console.timeEnd('each selector');
         }
         yield createResultForScraper({
             values,
@@ -67,10 +62,10 @@ const run = (schedule) => __awaiter(void 0, void 0, void 0, function* () {
         });
     }
     yield puppeteer_1.browser.close(page);
-    console.log('Done', ...executionId);
+    logger_1.logger.info('Done', ...executionId);
 });
 const init = () => {
-    console.log('Worker initialized');
+    logger_1.logger.info('Worker initialized');
     node_cron_1.default.schedule('*/15 * * * *', () => run(15));
     node_cron_1.default.schedule('*/30 * * * *', () => run(30));
     node_cron_1.default.schedule('0 * * * *', () => run(60));
@@ -80,7 +75,6 @@ const init = () => {
 };
 exports.init = init;
 const main = () => __awaiter(void 0, void 0, void 0, function* () {
-    // init();
-    yield run(15);
+    (0, exports.init)();
 });
 main();

@@ -3,6 +3,7 @@ import cron from 'node-cron';
 import { browser } from './helpers/puppeteer';
 import { Scraper } from './types';
 import { sql } from './helpers/db';
+import { logger } from './helpers/logger';
 
 type Schedule = 15 | 30 | 60 | 180 | 720 | 1440;
 
@@ -21,19 +22,18 @@ const createResultForScraper = async ({
   values: any[];
   selectors: Scraper['selectors'];
 }) => {
-  console.log('createResults', selectors, values);
+  logger.info('create-results', JSON.stringify({selectors, values}));
   // const results = values.map((value: any, index: any) => ({
   //   selectorId: selectors[index]._id,
   //   value,
   //   createdAt: new Date(),
   // }));
   // await ResultCollection.insertMany(results);
-  console.log('done creating results');
 };
 
 const run = async (schedule: Schedule) => {
   const executionId = [schedule, new Date().toISOString()];
-  console.log('Running', ...executionId);
+  logger.info('Running', ...executionId);
 
   const [scrapers, page] = await Promise.all([
     getScrapers(schedule),
@@ -42,7 +42,7 @@ const run = async (schedule: Schedule) => {
 
   for (const scraper of scrapers) {
     const { url, selectors } = scraper;
-    console.log(url, selectors);
+    // logger.info(url, selectors);
 
     console.time('goto')
     await page.goto(url, { waitUntil: 'networkidle2' });
@@ -50,10 +50,7 @@ const run = async (schedule: Schedule) => {
 
     const values = [];
     for (const item of selectors) {
-      console.time('each selector')
-      console.log('selector', item.selector);
 
-      console.time('wait for selector')
       const elements = await page.$$(item.selector);
       const inside = await Promise.all(
         elements.map(async (el) => {
@@ -61,10 +58,8 @@ const run = async (schedule: Schedule) => {
           return content.jsonValue();
         })
       );
-      console.timeEnd('wait for selector')
 
       values.push(inside);
-      console.timeEnd('each selector')
     }
 
     await createResultForScraper({
@@ -75,11 +70,11 @@ const run = async (schedule: Schedule) => {
 
   await browser.close(page);
 
-  console.log('Done', ...executionId);
+  logger.info('Done', ...executionId);
 };
 
 export const init = () => {
-  console.log('Worker initialized');
+  logger.info('Worker initialized');
   cron.schedule('*/15 * * * *', () => run(15));
   cron.schedule('*/30 * * * *', () => run(30));
   cron.schedule('0 * * * *', () => run(60));
@@ -93,10 +88,7 @@ export const init = () => {
 
 
 const main = async () => {
-  // init();
-
-  await run(15);
-
+  init();
 }
 
 main()
